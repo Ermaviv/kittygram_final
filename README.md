@@ -51,10 +51,17 @@ Kittygram - социальная сеть.
     - TELEGRAM_TOKEN (токен от Telegram-канала, куда отправлять инфу о состоянии деплоя)
 - Создайте файл и директории, чтобы расположить 
 содержимое файла `kittygram_workflow.yml` в `/.github/workflows/main.yml`
-- Запустить команду сборку файла в корне директории проекта
+- Запустите последовательно команды
 ```bash
+# Производит сборку контейнеров в корне проекта
 docker compose -f docker-compose.production.yml up
+# Производит миграции БД (без нее будет ошибка связывания разных полей)
+docker compose -f docker-compose.production.yml exec backend python manage.py migrate
+# Перенесите статику для корректного отображения данных
+docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic --no-input
 ```
+
+
 - Для локального запуска тестов:
   - создайте виртуальное окружение
   - установите в него зависимости из `backend/requirements.txt`
@@ -69,6 +76,13 @@ POSTGRES_PASSWORD=<пароль БД, обятальное поле>
 POSTGRES_DB=<наименование БД>
 DB_HOST=<IP адрес БД, если локальная - 127.0.0.1>
 DB_PORT=<Порт для БД от хоста, стандартный - 5433>
+
+SECRET_KEY = '<ключ, указываемый в одноименном поле в файле>'
+'<backend/kittygram_backend/settings.py>'
+
+ALLOWED_HOSTS = '<имя домена, где размещаете проект> 127.0.0.1 localhost'
+# Поменяйте ниже на "True", чтобы увидеть ошибки, если проект работает некорректно
+DEBUG = False 
 ```
 ## Авторы проекта
 - Yandex Practicum
